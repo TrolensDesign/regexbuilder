@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Regex Builder</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div>
+        <h1>Regex Builder</h1>
+        <p class="subtitle">Build a regular expression step by step.</p>
+      </div>
+      <div class="actions">
+        <button id="clearAll" class="ghost">Clear</button>
+        <button id="copyRegex" class="primary">Copy regex</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <h2>Blocks</h2>
+        <p class="hint">Add ready-made building blocks or define your own.</p>
+        <div class="block-grid">
+          <button class="block" data-token="literal">Literal</button>
+          <button class="block" data-token="digit">Digit (\d)</button>
+          <button class="block" data-token="word">Word character (\w)</button>
+          <button class="block" data-token="whitespace">Whitespace (\s)</button>
+          <button class="block" data-token="any">Any character (.)</button>
+          <button class="block" data-token="start">Start (^)</button>
+          <button class="block" data-token="end">End ($)</button>
+          <button class="block" data-token="group">Group ()</button>
+          <button class="block" data-token="alternation">Alternation (|)</button>
+        </div>
+
+        <form id="customForm" class="custom-form">
+          <h3>Custom block</h3>
+          <label>
+            Type
+            <select id="customType">
+              <option value="literal">Literal</option>
+              <option value="charClass">Character class []</option>
+              <option value="namedGroup">Named group</option>
+            </select>
+          </label>
+          <label>
+            Value
+            <input id="customValue" name="value" type="text" placeholder="e.g. abc or a-z" required />
+          </label>
+          <label id="customNameLabel" class="hidden">
+            Group name
+            <input id="customName" name="name" type="text" placeholder="e.g. segment" />
+          </label>
+          <button type="submit" class="primary">Add block</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Your blocks</h2>
+          <p class="hint">Use the quantifier picker for each block.</p>
+        </div>
+        <ul id="tokenList" class="token-list" aria-live="polite"></ul>
+      </section>
+
+      <section class="panel">
+        <h2>Preview</h2>
+        <div class="preview-card">
+          <label class="preview-label" for="regexOutput">Regex</label>
+          <output id="regexOutput" class="regex-output">/ /</output>
+          <div class="flag-row">
+            <span>Flags:</span>
+            <label title="i = case-insensitive (A = a)"><input type="checkbox" value="i" class="flag" /> i</label>
+            <label title="m = multiline (^ and $ work per line)"><input type="checkbox" value="m" class="flag" /> m</label>
+            <label title="s = dotall (. also matches new lines)"><input type="checkbox" value="s" class="flag" /> s</label>
+            <label title="g = global (find all matches, not only first)"><input type="checkbox" value="g" class="flag" checked /> g</label>
+          </div>
+        </div>
+
+        <details class="help-card" open>
+          <summary>How to use this builder</summary>
+          <ol>
+            <li>Add blocks in the order you want to match text.</li>
+            <li>Set a quantifier for each block (optional, one, many, ranges).</li>
+            <li>Enable flags if needed (see descriptions below).</li>
+            <li>Paste text into <strong>Tester</strong> to see live matches.</li>
+            <li>Use <strong>Copy regex</strong> to copy the final expression.</li>
+          </ol>
+
+          <h3>What flags mean</h3>
+          <ul>
+            <li><code>i</code> — case-insensitive, e.g. <code>cat</code> matches <code>Cat</code>.</li>
+            <li><code>m</code> — multiline mode, so <code>^</code> and <code>$</code> work on each line.</li>
+            <li><code>s</code> — dotall mode, so <code>.</code> can match newline characters too.</li>
+            <li><code>g</code> — global search, finds all matches instead of just the first one.</li>
+          </ul>
+
+          <h3>Block quick reference</h3>
+          <ul>
+            <li><code>\d</code> digit, <code>\w</code> word char, <code>\s</code> whitespace.</li>
+            <li><code>^</code> start of text/line, <code>$</code> end of text/line.</li>
+            <li><code>.</code> any character (except new line unless <code>s</code> is enabled).</li>
+            <li><code>|</code> alternation (either left or right side matches).</li>
+          </ul>
+        </details>
+
+        <div class="tester">
+          <h3>Tester</h3>
+          <label for="testInput" class="hint">Paste text to test against the regex.</label>
+          <textarea id="testInput" rows="6" placeholder="e.g. user-123"></textarea>
+          <div id="testResult" class="test-result" role="status"></div>
+        </div>
+      </section>
+    </main>
+
+    <template id="tokenTemplate">
+      <li class="token-item">
+        <div class="token-main">
+          <span class="token-label"></span>
+          <span class="token-pattern"></span>
+        </div>
+        <div class="token-controls">
+          <label>
+            Quantifier
+            <select class="token-quantifier">
+              <option value="">exactly 1</option>
+              <option value="?">optional (?)</option>
+              <option value="*">0 or more (*)</option>
+              <option value="+">1 or more (+)</option>
+              <option value="{2}">exactly 2 ({2})</option>
+              <option value="{3}">exactly 3 ({3})</option>
+              <option value="{2,5}">between 2 and 5 ({2,5})</option>
+            </select>
+          </label>
+          <button class="ghost small token-up" type="button" aria-label="Move up">↑</button>
+          <button class="ghost small token-down" type="button" aria-label="Move down">↓</button>
+          <button class="danger small token-remove" type="button">Remove</button>
+        </div>
+      </li>
+    </template>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
